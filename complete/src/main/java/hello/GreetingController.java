@@ -16,7 +16,7 @@ public class GreetingController {
     @RequestMapping("/greeting")
     public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
         try {
-            GpioOutput.go("01");
+            GpioOutput.go();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (PlatformAlreadyAssignedException e) {
