@@ -1,45 +1,34 @@
 package hello;
 
-/**
- * Created by bluebyte60 on 9/21/18.
- */
-
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import com.pi4j.platform.PlatformAlreadyAssignedException;
-import com.pi4j.util.CommandArgumentParser;
 import com.pi4j.util.Console;
 import com.pi4j.util.ConsoleColor;
 
-public class GpioOutput {
+/**
+ * Created by bluebyte60 on 9/21/18.
+ */
+public class GPIOSingleton {
+    private static GPIOSingleton instance = new GPIOSingleton();
 
-    /**
-     * [ARGUMENT/OPTION "--pin (#)" | "-p (#)" ]
-     * This example program accepts an optional argument for specifying the GPIO pin (by number)
-     * to use with this GPIO listener example. If no argument is provided, then GPIO #1 will be used.
-     * -- EXAMPLE: "--pin 4" or "-p 0".
-     *
-     * @throws InterruptedException
-     * @throws PlatformAlreadyAssignedException
-     */
-    public static void go() throws InterruptedException, PlatformAlreadyAssignedException {
+    // create Pi4J console wrapper/helper
+    // (This is a utility class to abstract some of the boilerplate code)
+    final Console console = new Console();
 
-        // create Pi4J console wrapper/helper
-        // (This is a utility class to abstract some of the boilerplate code)
-        final Console console = new Console();
+    final GpioController gpio = GpioFactory.getInstance();
 
+    // provision gpio pin as an output pin and turn on
+    final GpioPinDigitalOutput output = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "My Output", PinState.LOW);
+
+    private GPIOSingleton() {
         // print program title/header
         console.title("<-- The Pi4J Project -->", "GPIO Output Example");
 
         // allow for user to exit program using CTRL-C
         console.promptForExit();
-
         // create gpio controller
-        final GpioController gpio = GpioFactory.getInstance();
 
-        // provision gpio pin as an output pin and turn on
-        final GpioPinDigitalOutput output = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "My Output", PinState.LOW);
 
         // set shutdown state for this pin: keep as output pin, set to low state
         output.setShutdownOptions(false, PinState.LOW);
@@ -72,21 +61,19 @@ public class GpioOutput {
                         ConsoleColor.RED,           // negative conditional color
                         output.getState()));        // text to display
 
-        // wait
-        Thread.sleep(500);
+    }
 
-        // --------------------------------------------------------------------------
+    public static GPIOSingleton getInstance() {
+        return instance;
+    }
 
+    public synchronized void onAWhile() throws InterruptedException {
         // tset gpio pin state to LOW
         console.emptyLine();
         console.println("Setting output pin state is set to LOW.");
-        output.low(); // or ... output.setState(PinState.LOW);
-
-
-        // stop all GPIO activity/threads by shutting down the GPIO controller
-        // (this method will forcefully shutdown all GPIO monitoring threads and scheduled tasks)
-        gpio.shutdown();
-        gpio.unprovisionPin(output);
-
+        output.high(); // or ... output.setState(PinState.LOW);
+        Thread.sleep(1000);
+        output.low();
+        Thread.sleep(1000);
     }
 }

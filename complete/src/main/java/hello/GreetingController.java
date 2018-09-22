@@ -16,11 +16,9 @@ public class GreetingController {
     @RequestMapping("/greeting")
     public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
         try {
-            GpioOutput.go();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (PlatformAlreadyAssignedException e) {
-            e.printStackTrace();
+            GPIOSingleton.getInstance().onAWhile();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
         return new Greeting(counter.incrementAndGet(),
                             String.format(template, name));
