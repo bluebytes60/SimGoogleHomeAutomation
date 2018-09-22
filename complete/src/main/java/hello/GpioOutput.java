@@ -20,11 +20,10 @@ public class GpioOutput {
      * to use with this GPIO listener example. If no argument is provided, then GPIO #1 will be used.
      * -- EXAMPLE: "--pin 4" or "-p 0".
      *
-     * @param args
      * @throws InterruptedException
      * @throws PlatformAlreadyAssignedException
      */
-    public static void go(String gpioOutput) throws InterruptedException, PlatformAlreadyAssignedException {
+    public static void go() throws InterruptedException, PlatformAlreadyAssignedException {
 
         // create Pi4J console wrapper/helper
         // (This is a utility class to abstract some of the boilerplate code)
@@ -39,15 +38,8 @@ public class GpioOutput {
         // create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
 
-        // by default we will use gpio pin #01; however, if an argument
-        // has been provided, then lookup the pin by address
-        Pin pin = CommandArgumentParser.getPin(
-                RaspiPin.class,    // pin provider class to obtain pin instance from
-                RaspiPin.GPIO_01,  // default pin if no pin argument found
-                gpioOutput);             // argument array to search in
-
         // provision gpio pin as an output pin and turn on
-        final GpioPinDigitalOutput output = gpio.provisionDigitalOutputPin(pin, "My Output", PinState.HIGH);
+        final GpioPinDigitalOutput output = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "My Output", PinState.HIGH);
 
         // set shutdown state for this pin: keep as output pin, set to low state
         output.setShutdownOptions(false, PinState.LOW);
@@ -94,5 +86,6 @@ public class GpioOutput {
         // stop all GPIO activity/threads by shutting down the GPIO controller
         // (this method will forcefully shutdown all GPIO monitoring threads and scheduled tasks)
         gpio.shutdown();
+        gpio.unprovisionPin(output);
     }
 }
